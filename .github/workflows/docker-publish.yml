@@ -32,6 +32,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/franka_ros2:latest
-            ghcr.io/${{ github.repository_owner }}/franka_ros2:jazzy
-            ghcr.io/${{ github.repository_owner }}/franka_ros2:${{ github.sha }}
+            ghcr.io/chipclee/franka_ros2:latest
+            ghcr.io/chipclee/franka_ros2:jazzy
+            ghcr.io/chipclee/franka_ros2:${{ github.sha }}
