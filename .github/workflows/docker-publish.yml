@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: chipclee
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
@@ -33,6 +33,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/chipclee/franka_ros2:latest
-            ghcr.io/chipclee/franka_ros2:jazzy
-            ghcr.io/chipclee/franka_ros2:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/franka_ros2:latest
+            ghcr.io/${{ github.repository_owner }}/franka_ros2:jazzy
+            ghcr.io/${{ github.repository_owner }}/franka_ros2:${{ github.sha }}
