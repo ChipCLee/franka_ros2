@@ -74,7 +74,6 @@ RUN sudo apt-get update \
         ros-humble-teleop-twist-keyboard \
         ros-humble-joy \
         ros-humble-teleop-twist-joy \
-
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/*
 
@@ -90,9 +89,7 @@ RUN sudo chown -R $USERNAME:$USERNAME /ros2_ws \
        --skip-keys="franka_selfcollision gz_sim_vendor parallel_gripper_controller gz_plugin_vendor" \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* \
-    && rm -rf /home/$USERNAME/.ros \
-    && rm -rf src \
-    && mkdir -p src
+    && rm -rf /home/$USERNAME/.ros
 
 COPY ./franka_entrypoint.sh /franka_entrypoint.sh
 RUN sudo chmod +x /franka_entrypoint.sh
