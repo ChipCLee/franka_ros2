@@ -1,0 +1,1 @@
+sudo docker run --network host --privileged --cap-add=SYS_NICE --ulimit rtprio=99 --ulimit rttime=-1 --name franka_test -e ROS_DOMAIN_ID=42 -e ROS_LOCALHOST_ONLY=1 -d ghcr.io/rr-aa-cl/franka_ros2:humble ros2 launch franka_bringup franka.launch.py robot_ip:=192.168.3.100 robot_type:=fr3

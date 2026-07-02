@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fr3">
+
+  <xacro:include filename="$(find franka_description)/robots/common/franka_robot.xacro"/>
+
+  <!-- Define arguments -->
+  <!-- The ID of the robot model to be used -->
+  <xacro:arg name="robot_type" default="fr3"/>
+
+  <!-- The prefix of the robot -->
+  <xacro:arg name="arm_prefix" default=""/>
+
+  <!-- Don't print a prefix for joints, visuals, and links? -->
+  <xacro:arg name="no_prefix" default="false"/>
+
+  <!-- Should an end-effector be mounted at the flange?" -->
+  <xacro:arg name="hand" default="true"/>
+
+  <!-- Which end-effector would be mounted at the flange?" -->
+  <xacro:arg name="ee_id" default="franka_hand"/>
+
+  <!-- Where is the end-effector connected to, if different from the robot flange?  -->
+  <xacro:arg name="special_connection" default=""/>
+
+  <!-- Position offset between ee and parent frame -->
+  <xacro:arg name="xyz_ee" default="0 0 0"/>
+
+  <!-- Rotation offset between ee and parent frame -->
+  <xacro:arg name="rpy_ee" default="0 0 ${-pi/4}"/>
+
+  <!-- Position offset between ee frame and tcp frame -->
+  <xacro:arg name="tcp_xyz" default="0 0 0.1034"/>
+
+  <!-- Rotation offset between ee frame and tcp frame -->
+  <xacro:arg name="tcp_rpy" default="0 0 0"/>
+
+  <!-- Safety distance for the collision capsules -->
+  <xacro:arg name="safety_distance" default="0.03"/>
+
+  <!-- Should self-collision be enabled? -->
+  <xacro:arg name="with_sc" default="false"/>
+
+  <!-- Should the robot be spawned in Gazebo?" -->
+  <xacro:arg name="gazebo" default="false"/>
+
+  <!-- Name of the description package -->
+  <xacro:arg name="description_pkg" default="franka_description"/>
+
+  <!-- Append an underscore to the user-provided prefix, if non-empty. -->
+  <xacro:property name="prefix" value="$(arg arm_prefix)"/>
+  <xacro:property name="modified_prefix" value="${prefix + '_' if prefix else ''}"/>
+
+  <!--Position
+  offset with respect to the world-->
+  <xacro:arg name="xyz" default="0 0 0"/>
+
+  <!--Rotation
+  offset with respect to the world-->
+  <xacro:arg name="rpy" default="0 0 0"/>
+
+  <xacro:if value="$(arg gazebo)">
+    <link name="world"/>
+
+    <!-- Define Table Link -->
+    <link name="table">
+      <visual>
+        <origin xyz="0 0 0.4" rpy="0 0 0"/>
+        <geometry>
+          <box size="1.0 2.0 0.8"/>
+        </geometry>
+        <material name="wood">
+          <color rgba="0.6 0.4 0.2 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.4" rpy="0 0 0"/>
+        <geometry>
+          <box size="1.0 2.0 0.8"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Define Wall Link -->
+    <link name="wall">
+      <visual>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.1 2.0 1.0"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.1 2.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Joint: World to Table -->
+    <joint name="world_to_table" type="fixed">
+      <parent link="world"/>
+      <child link="table"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Joint: Table to Wall -->
+    <joint name="table_to_wall" type="fixed">
+      <parent link="table"/>
+      <child link="wall"/>
+      <origin xyz="-0.45 0 0.8" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Joint: Wall to Robot (Mounted vertically on the wall facing forward) -->
+    <joint name="wall_to_robot" type="fixed">
+      <parent link="wall"/>
+      <child link="${modified_prefix}$(arg robot_type)_link0"/>
+      <!-- Mounted on the front surface of the wall (0.05m forward from wall center), 0.6m up from wall base, rotated 90 degrees around Y axis -->
+      <origin xyz="0.05 0 0.6" rpy="0 ${pi/2} 0"/>
+    </joint>
+  </xacro:if>
+
+  <xacro:franka_robot robot_type="fr3"
+    gazebo="$(arg gazebo)"
+    hand="$(arg hand)"
+    ee_id="$(arg ee_id)"
+    special_connection="$(arg special_connection)"
+    xyz_ee="$(arg xyz_ee)"
+    rpy_ee="$(arg rpy_ee)"
+    tcp_xyz="$(arg tcp_xyz)"
+    tcp_rpy="$(arg tcp_rpy)"
+    safety_distance="$(arg safety_distance)"
+    with_sc="$(arg with_sc)"
+    no_prefix="$(arg no_prefix)"
+    arm_prefix="${modified_prefix}"
+    description_pkg="$(arg description_pkg)"
+    connected_to="base">
+  </xacro:franka_robot>
+
+</robot>
