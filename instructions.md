@@ -373,3 +373,121 @@ The running container `franka_sim` has already been configured with **Method A**
   docker stop franka_sim && docker start franka_sim
   ```
 
+---
+
+## 7. Controlling the Robot with MoveIt2
+
+MoveIt2 is the standard motion planning framework for ROS2. It allows you to plan collision-free paths in both joint space and Cartesian space (X, Y, Z). MoveIt2 exposes control interfaces via an interactive **RViz GUI** as well as **Python** and **C++** APIs.
+
+### 1. Interactive Control via MoveIt2 RViz Plugin
+To launch MoveIt2 with a simulated backend:
+```bash
+docker run --network host \
+  --privileged \
+  --name franka_moveit \
+  -e DISPLAY=:2 \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -d ghcr.io/rr-aa-cl/franka_ros2:humble \
+  ros2 launch franka_fr3_moveit_config moveit.launch.py use_fake_hardware:=true
+```
+1. Open your VNC client and connect to display `:2` (`10.180.68.126:5902`).
+2. In the RViz interface, make sure the **Motion Planning** panel is open.
+3. Select the planning group: `fr3_arm` (or the appropriate gripper/arm group).
+4. Use the interactive 3D marker (triad arrow) on the end effector to drag the arm to a new location.
+5. In the planning tab, click **Plan** to visualize the path, and **Execute** to command the robot to move.
+
+---
+
+### 2. Programmatic Control via Python (moveit_py)
+MoveIt2 provides a native Python API called `moveit_py` to plan and execute trajectories programmatically.
+
+Here is an example Python script to configure and move the arm to a target pose:
+
+```python
+#!/usr/bin/env python3
+import time
+import rclcpp
+from moveit.planning import MoveItPy
+from geometry_msgs.msg import PoseStamped
+
+def plan_and_execute_pose():
+    rclcpp.init()
+    
+    # 1. Instantiate the MoveItPy client node
+    fr3 = MoveItPy(node_name="moveit_py_client")
+    
+    # 2. Get the arm planning group (default is fr3_arm)
+    fr3_arm = fr3.get_planning_group("fr3_arm")
+    
+    # 3. Create a goal pose (Cartesian target)
+    target_pose = PoseStamped()
+    target_pose.header.frame_id = "fr3_link0"
+    target_pose.pose.position.x = 0.4
+    target_pose.pose.position.y = 0.0
+    target_pose.pose.position.z = 0.5
+    target_pose.pose.orientation.w = 1.0
+    
+    # 4. Set the goal pose
+    fr3_arm.set_start_state_to_current_state()
+    fr3_arm.set_pose_target(target_pose)
+    
+    # 5. Plan and execute
+    plan_result = fr3_arm.plan()
+    if plan_result:
+        fr3_arm.execute()
+        print("Trajectory executed successfully!")
+    else:
+        print("Planning failed!")
+        
+    rclcpp.shutdown()
+
+if __name__ == '__main__':
+    plan_and_execute_pose()
+```
+
+---
+
+### 3. Programmatic Control via C++ (MoveGroupInterface)
+For performance-critical systems, you can use the MoveGroup C++ API.
+
+```cpp
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/move_group_interface/move_group_interface.h>
+
+int main(int argc, char** argv)
+{
+  rclcpp::init(argc, argv);
+  auto const node = std::make_shared<rclcpp::Node>(
+    "moveit_cpp_client",
+    rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true)
+  );
+  
+  // Create MoveGroupInterface for the FR3 arm
+  using moveit::planning_interface::MoveGroupInterface;
+  auto move_group_interface = MoveGroupInterface(node, "fr3_arm");
+  
+  // Set Cartesian target pose
+  geometry_msgs::msg::Pose target_pose;
+  target_pose.orientation.w = 1.0;
+  target_pose.position.x = 0.4;
+  target_pose.position.y = 0.0;
+  target_pose.position.z = 0.5;
+  move_group_interface.setPoseTarget(target_pose);
+  
+  // Plan and execute
+  MoveGroupInterface::Plan my_plan;
+  auto const ok = static_cast<bool>(move_group_interface.plan(my_plan));
+  
+  if (ok) {
+    move_group_interface.execute(my_plan);
+    RCLCPP_INFO(node->get_logger(), "Trajectory executed successfully!");
+  } else {
+    RCLCPP_ERROR(node->get_logger(), "Planning failed!");
+  }
+  
+  rclcpp::shutdown();
+  return 0;
+}
+```
+
+
