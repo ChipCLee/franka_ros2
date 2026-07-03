@@ -373,6 +373,12 @@ The running container `franka_sim` has already been configured with **Method A**
   docker stop franka_sim && docker start franka_sim
   ```
 
+> [!IMPORTANT]
+> **Gazebo Effort Control vs Position Control:**
+> In the simulation launch file (`gazebo_franka_arm_example_controller.launch.py`), the `gazebo_effort` mapping is set to `'true'` by default, which registers only effort/torque interfaces and makes the robot ignore position trajectory commands. To enable standard position trajectory controllers (like `position_joint_trajectory_controller`), you must set `'gazebo_effort': 'false'` in the `xacro.process_file` mappings within the launch file inside the container:
+> - **Path**: `/ros2_ws/src/franka_gazebo/franka_gazebo_bringup/launch/gazebo_franka_arm_example_controller.launch.py` (and `/ros2_ws/install/...`).
+
+
 ---
 
 ## 7. Controlling the Robot with MoveIt2
@@ -489,5 +495,20 @@ int main(int argc, char** argv)
   return 0;
 }
 ```
+
+---
+
+## 8. Drawing a Circle Infinitely
+
+To make the robot end-effector draw a circle continuously in the Cartesian space, you can run the pre-configured [circle_trajectory.py](file:///Users/chengchung.lee/sources/franka_ros2/circle_trajectory.py) script. This script publishes sinusoidal trajectory commands to the `/position_joint_trajectory_controller/joint_trajectory` topic in quadrature.
+
+### Run the Circle Trajectory Script:
+Execute the script inside your running simulation container:
+```bash
+docker exec -it franka_sim /bin/bash -c "source /ros2_ws/install/setup.bash && python3 /ros2_ws/circle_trajectory.py"
+```
+
+The arm will begin drawing a smooth circle in front of the table's wall indefinitely. You can visualize this motion in Gazebo or RViz via your VNC connection. Use `Ctrl+C` in the terminal to stop the script.
+
 
 

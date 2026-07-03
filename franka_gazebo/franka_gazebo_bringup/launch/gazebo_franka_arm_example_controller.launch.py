@@ -69,7 +69,7 @@ def get_robot_description(context: LaunchContext, robot_type, load_gripper, fran
             'hand': load_gripper_str,
             'gazebo': 'true',
             'ee_id': franka_hand_str,
-            'gazebo_effort': 'true',
+            'gazebo_effort': 'false',
         }
     )
 
