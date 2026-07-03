@@ -27,6 +27,9 @@
       swerve_drive_controller:
         type: franka_mobile/SwerveDriveController
 
+      position_joint_trajectory_controller:
+        type: joint_trajectory_controller/JointTrajectoryController
+
 /**:
   joint_velocity_example_controller:
     ros__parameters:
@@ -101,3 +104,21 @@
       prefix: "tmrv0_2_"
       wheel_1_link_name: argo_drive_front_link
       wheel_2_link_name: argo_drive_rear_link
+
+/**:
+  position_joint_trajectory_controller:
+    ros__parameters:
+      joints:
+        - fr3_joint1
+        - fr3_joint2
+        - fr3_joint3
+        - fr3_joint4
+        - fr3_joint5
+        - fr3_joint6
+        - fr3_joint7
+      command_interfaces:
+        - position
+      state_interfaces:
+        - position
+        - velocity
+

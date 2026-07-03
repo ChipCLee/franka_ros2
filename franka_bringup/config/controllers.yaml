@@ -62,6 +62,9 @@
       swerve_drive_controller:
         type: franka_mobile/SwerveDriveController
 
+      position_joint_trajectory_controller:
+        type: joint_trajectory_controller/JointTrajectoryController
+
 
 /**:
   joint_impedance_example_controller:
@@ -166,6 +169,23 @@
           has_acceleration_limits: true
           max_acceleration       : 0.1  # rad/s^2
           min_acceleration       : -0.1  # rad/s^2
-          has_jerk_limits        : false
           max_jerk               : 10.0  # rad/s^3
           min_jerk               : -10.0  # rad/s^3
+
+/**:
+  position_joint_trajectory_controller:
+    ros__parameters:
+      joints:
+        - fr3_joint1
+        - fr3_joint2
+        - fr3_joint3
+        - fr3_joint4
+        - fr3_joint5
+        - fr3_joint6
+        - fr3_joint7
+      command_interfaces:
+        - position
+      state_interfaces:
+        - position
+        - velocity
+
